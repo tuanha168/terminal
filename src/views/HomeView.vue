@@ -3,5 +3,9 @@ import Terminal from '@/components/TerminalComponent.vue'
 </script>
 
 <template>
-  <Terminal />
+  <div>
+    <h1>Home</h1>
+    <button @click="$router.push('/about')">About</button>
+    <Terminal />
+  </div>
 </template>
