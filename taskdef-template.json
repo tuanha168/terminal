@@ -17,10 +17,24 @@
           "awslogs-group": "__LOG_GROUP__",
           "awslogs-region": "__AWS_REGION__",
           "awslogs-datetime-format": "%Y-%m-%d %H:%M:%S",
-          "awslogs-stream-prefix": "__CONTAINER_NAME__"
+          "awslogs-stream-prefix": "terminal"
         }
       },
       "essential": true
+    },
+    {
+      "name": "test",
+      "image": "__ECR_IMAGE__",
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "__LOG_GROUP__",
+          "awslogs-region": "__AWS_REGION__",
+          "awslogs-datetime-format": "%Y-%m-%d %H:%M:%S",
+          "awslogs-stream-prefix": "terminal"
+        }
+      },
+      "essential": false
     }
   ],
   "taskRoleArn": "__TASK_ROLE__",
