@@ -33,11 +33,12 @@ phases:
       - TASK_EXECUTION_MEMORY=$(echo $BUILD_SECRETS | jq -r '.TASK_EXECUTION_MEMORY')
       - APP_SPEC_FILE_NAME=$(echo $BUILD_SECRETS | jq -r '.APP_SPEC_FILE_NAME')
       - CONTAINER_PORT=$(echo $BUILD_SECRETS | jq -r '.CONTAINER_PORT')
+      - docker buildx create --name container --driver=docker-container --driver-opt default-load=true
 
   build:
     commands:
       - echo Building the Docker image...
-      - docker build --platform linux/amd64 -t $IMAGE_REPO -f ./deployment/ecs/Dockerfile . --no-cache
+      - docker build --platform linux/amd64 --cache-to mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=$ECR_URI:build-cache --cache-from type=registry,ref=$ECR_URI:build-cache -t $IMAGE_REPO --builder=container -f ./deployment/ecs/Dockerfile .
       - docker tag $IMAGE_REPO:latest $ECR_URI:latest
       - docker tag $IMAGE_REPO:latest $ECR_URI:$IMAGE_TAG
 
