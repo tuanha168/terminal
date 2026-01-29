@@ -34,6 +34,7 @@ phases:
       - APP_SPEC_FILE_NAME=$(echo $BUILD_SECRETS | jq -r '.APP_SPEC_FILE_NAME')
       - CONTAINER_PORT=$(echo $BUILD_SECRETS | jq -r '.CONTAINER_PORT')
       - docker buildx create --name container --driver=docker-container --driver-opt default-load=true
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
 
   build:
     commands:
@@ -47,7 +48,6 @@ phases:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
       - docker image ls -a
-      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
       - docker push $ECR_URI:latest
       - docker push $ECR_URI:$IMAGE_TAG
       - cp appspec.yml $APP_SPEC_FILE_NAME
