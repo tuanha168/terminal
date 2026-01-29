@@ -7,7 +7,7 @@
       "portMappings": [
         {
           "containerPort": "__CONTAINER_PORT__",
-          "hostPort": 80,
+          "hostPort": "__CONTAINER_PORT__",
           "protocol": "tcp"
         }
       ],
@@ -17,30 +17,16 @@
           "awslogs-group": "__LOG_GROUP__",
           "awslogs-region": "__AWS_REGION__",
           "awslogs-datetime-format": "%Y-%m-%d %H:%M:%S",
-          "awslogs-stream-prefix": "terminal"
+          "awslogs-stream-prefix": "__CONTAINER_NAME__"
         }
       },
       "essential": true
-    },
-    {
-      "name": "test",
-      "image": "__ECR_IMAGE__",
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "__LOG_GROUP__",
-          "awslogs-region": "__AWS_REGION__",
-          "awslogs-datetime-format": "%Y-%m-%d %H:%M:%S",
-          "awslogs-stream-prefix": "terminal"
-        }
-      },
-      "essential": false
     }
   ],
   "taskRoleArn": "__TASK_ROLE__",
   "executionRoleArn": "__EXECUTION_ROLE__",
-  "cpu": "256",
-  "memory": "512",
+  "cpu": "__TASK_EXECUTION_CPU__",
+  "memory": "__TASK_EXECUTION_MEMORY__",
   "networkMode": "awsvpc",
   "runtimePlatform": {
     "operatingSystemFamily": "LINUX"
