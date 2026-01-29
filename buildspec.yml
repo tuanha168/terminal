@@ -40,16 +40,16 @@ phases:
     commands:
       - echo Building the Docker image...
       - docker build --platform linux/amd64 -t $IMAGE_REPO -f ./deployment/ecs/Dockerfile . --no-cache
-      - docker tag $IMAGE_REPO:latest $REPOSITORY_URI:latest
-      - docker tag $IMAGE_REPO:latest $REPOSITORY_URI:$IMAGE_TAG
+      - docker tag $IMAGE_REPO:latest $REPOSITORY_URL:latest
+      - docker tag $IMAGE_REPO:latest $REPOSITORY_URL:$IMAGE_TAG
 
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
       - docker image ls -a
-      - docker push $REPOSITORY_URI:latest
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URL:latest
+      - docker push $REPOSITORY_URL:$IMAGE_TAG
       - sed -ie "s@__CONTAINER_NAME__@$CONTAINER_NAME@" appspec.yml
       - sed -ie "s@__CONTAINER_PORT__@$CONTAINER_PORT@" appspec.yml
       - cp taskdef-template.json $TASK_DEFINITION_FILE_NAME
@@ -57,7 +57,7 @@ phases:
       - sed -ie "s@\"__CONTAINER_PORT__\"@$CONTAINER_PORT@" $TASK_DEFINITION_FILE_NAME
       - sed -ie "s@__TASK_DEFINITION_FAMILY__@$TASK_DEFINITION_FAMILY@" $TASK_DEFINITION_FILE_NAME
       - sed -ie "s@__AWS_REGION__@$AWS_REGION@" $TASK_DEFINITION_FILE_NAME
-      - sed -ie "s@__ECR_IMAGE__@$REPOSITORY_URI:$IMAGE_TAG@" $TASK_DEFINITION_FILE_NAME
+      - sed -ie "s@__ECR_IMAGE__@$REPOSITORY_URL:$IMAGE_TAG@" $TASK_DEFINITION_FILE_NAME
       - sed -ie "s@__LOG_GROUP__@$LOG_GROUP@" $TASK_DEFINITION_FILE_NAME
       - sed -ie "s@__TASK_ROLE__@$TASK_EXECUTION_ROLE@" $TASK_DEFINITION_FILE_NAME
       - sed -ie "s@__EXECUTION_ROLE__@$TASK_EXECUTION_ROLE@" $TASK_DEFINITION_FILE_NAME
