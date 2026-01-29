@@ -49,8 +49,8 @@ phases:
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
       - docker push $ECR_URI:latest
       - docker push $ECR_URI:$IMAGE_TAG
-      - sed -ie "s@__CONTAINER_NAME__@$CONTAINER_NAME@" appspec.yml
-      - sed -ie "s@__CONTAINER_PORT__@$CONTAINER_PORT@" appspec.yml
+      - sed -ie "s@__CONTAINER_NAME__@$CONTAINER_NAME@" $APP_SPEC_FILE_NAME
+      - sed -ie "s@__CONTAINER_PORT__@$CONTAINER_PORT@" $APP_SPEC_FILE_NAME
       - cp taskdef-template.json $TASK_DEFINITION_FILE_NAME
       - sed -ie "s@__CONTAINER_NAME__@$CONTAINER_NAME@" $TASK_DEFINITION_FILE_NAME
       - sed -ie "s@\"__CONTAINER_PORT__\"@$CONTAINER_PORT@" $TASK_DEFINITION_FILE_NAME
@@ -61,11 +61,10 @@ phases:
       - sed -ie "s@__TASK_ROLE__@$TASK_EXECUTION_ROLE@" $TASK_DEFINITION_FILE_NAME
       - sed -ie "s@__EXECUTION_ROLE__@$TASK_EXECUTION_ROLE@" $TASK_DEFINITION_FILE_NAME
 
-      - cat appspec.yml
+      - cat $APP_SPEC_FILE_NAME
       - cat $TASK_DEFINITION_FILE_NAME
 
 artifacts:
   files:
-    - appspec.yml
+    - $APP_SPEC_FILE_NAME
     - $TASK_DEFINITION_FILE_NAME
-    - dist
