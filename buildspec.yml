@@ -38,8 +38,8 @@ phases:
     commands:
       - echo Building the Docker image...
       - docker build --platform linux/amd64 -t $IMAGE_REPO -f ./deployment/ecs/Dockerfile . --no-cache
-      - docker tag $IMAGE_REPO:latest $REPOSITORY_URL:latest
-      - docker tag $IMAGE_REPO:latest $REPOSITORY_URL:$IMAGE_TAG
+      - docker tag $IMAGE_REPO:latest $ECR_URI:latest
+      - docker tag $IMAGE_REPO:latest $ECR_URI:$IMAGE_TAG
 
   post_build:
     commands:
@@ -47,8 +47,8 @@ phases:
       - echo Pushing the Docker image...
       - docker image ls -a
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
-      - docker push $REPOSITORY_URL:latest
-      - docker push $REPOSITORY_URL:$IMAGE_TAG
+      - docker push $ECR_URI:latest
+      - docker push $ECR_URI:$IMAGE_TAG
       - sed -ie "s@__CONTAINER_NAME__@$CONTAINER_NAME@" appspec.yml
       - sed -ie "s@__CONTAINER_PORT__@$CONTAINER_PORT@" appspec.yml
       - cp taskdef-template.json $TASK_DEFINITION_FILE_NAME
