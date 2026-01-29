@@ -4,6 +4,7 @@ env:
   secrets-manager:
     DOCKER_USER: ${SECRETS_MANAGER_ARN}:DOCKER_USER
     DOCKER_TOKEN: ${SECRETS_MANAGER_ARN}:DOCKER_TOKEN
+    EMPLOYEE_SECRETS: ${BUILDTIME_SECRETS_MANAGER_ARN}:main
 
 phases:
   install:
@@ -24,6 +25,17 @@ phases:
       - echo 'Start pre_build phase'
       - yarn -v
       - node --version
+      - export BUILD_SECRETS=$EMPLOYEE_SECRETS
+      - TASK_DEFINITION_FAMILY=$(echo $BUILD_SECRETS | jq -r '.TASK_DEFINITION_FAMILY')
+      - ECR_URI=$(echo $BUILD_SECRETS | jq -r '.ECR_URI')
+      - IMAGE_REPO=$(echo $BUILD_SECRETS | jq -r '.IMAGE_REPO')
+      - LOG_GROUP=$(echo $BUILD_SECRETS | jq -r '.LOG_GROUP')
+      - TASK_DEFINITION_FILE_NAME=$(echo $BUILD_SECRETS | jq -r '.TASK_DEFINITION_FILE_NAME')
+      - CONTAINER_NAME=$(echo $BUILD_SECRETS | jq -r '.CONTAINER_NAME')
+      - TASK_EXECUTION_CPU=$(echo $BUILD_SECRETS | jq -r '.TASK_EXECUTION_CPU')
+      - TASK_EXECUTION_MEMORY=$(echo $BUILD_SECRETS | jq -r '.TASK_EXECUTION_MEMORY')
+      - APP_SPEC_FILE_NAME=$(echo $BUILD_SECRETS | jq -r '.APP_SPEC_FILE_NAME')
+      - CONTAINER_PORT=$(echo $BUILD_SECRETS | jq -r '.CONTAINER_PORT')
 
   build:
     commands:
