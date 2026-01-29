@@ -2,8 +2,6 @@ version: 0.2
 
 env:
   secrets-manager:
-    DOCKER_USER: ${SECRETS_MANAGER_ARN}:DOCKER_USER
-    DOCKER_TOKEN: ${SECRETS_MANAGER_ARN}:DOCKER_TOKEN
     EMPLOYEE_SECRETS: ${BUILDTIME_SECRETS_MANAGER_ARN}:main
 
 phases:
@@ -48,6 +46,7 @@ phases:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
       - docker image ls -a
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
       - docker push $REPOSITORY_URL:latest
       - docker push $REPOSITORY_URL:$IMAGE_TAG
       - sed -ie "s@__CONTAINER_NAME__@$CONTAINER_NAME@" appspec.yml
