@@ -20,7 +20,13 @@
           "awslogs-stream-prefix": "__CONTAINER_NAME__"
         }
       },
-      "essential": true
+      "essential": true,
+      "secrets": [
+        {
+          "name": "USERNAME",
+          "valueFrom": "__RUNTIME_SECRETS_MANAGER_ARN__:USERNAME::"
+        }
+      ]
     }
   ],
   "taskRoleArn": "__TASK_ROLE__",
