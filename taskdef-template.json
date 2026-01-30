@@ -24,7 +24,7 @@
       "secrets": [
         {
           "name": "USERNAME",
-          "valueFrom": "__RUNTIME_SECRETS_MANAGER_ARN__:USERNAME1::"
+          "valueFrom": "__RUNTIME_SECRETS_MANAGER_ARN__:USERNAME2::"
         }
       ]
     }
