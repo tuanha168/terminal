@@ -1,0 +1,81 @@
+version: 0.2
+
+env:
+  secrets-manager:
+    EMPLOYEE_SECRETS: ${BUILDTIME_SECRETS_MANAGER_ARN}:main
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo Logging in to Amazon ECR....
+      - aws --version
+
+      # login to Elastic container registry
+      - echo $DOCKER_TOKEN | docker login -u $DOCKER_USER --password-stdin
+
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+
+  pre_build:
+    commands:
+      - echo 'Start pre_build phase'
+      - yarn -v
+      - node --version
+      - export BUILD_SECRETS=$EMPLOYEE_SECRETS
+      - TASK_DEFINITION_FAMILY=$(echo $BUILD_SECRETS | jq -r '.TASK_DEFINITION_FAMILY')
+      - ECR_URI=$(echo $BUILD_SECRETS | jq -r '.ECR_URI')
+      - IMAGE_REPO=$(echo $BUILD_SECRETS | jq -r '.IMAGE_REPO')
+      - LOG_GROUP=$(echo $BUILD_SECRETS | jq -r '.LOG_GROUP')
+      - TASK_DEFINITION_FILE_NAME=$(echo $BUILD_SECRETS | jq -r '.TASK_DEFINITION_FILE_NAME')
+      - CONTAINER_NAME=$(echo $BUILD_SECRETS | jq -r '.CONTAINER_NAME')
+      - TASK_EXECUTION_CPU=$(echo $BUILD_SECRETS | jq -r '.TASK_EXECUTION_CPU')
+      - TASK_EXECUTION_MEMORY=$(echo $BUILD_SECRETS | jq -r '.TASK_EXECUTION_MEMORY')
+      - APP_SPEC_FILE_NAME=$(echo $BUILD_SECRETS | jq -r '.APP_SPEC_FILE_NAME')
+      - CONTAINER_PORT=$(echo $BUILD_SECRETS | jq -r '.CONTAINER_PORT')
+      - ECS_SERVICE_NAME=$(echo $BUILD_SECRETS | jq -r '.ECS_SERVICE_NAME')
+      - docker buildx create --name container --driver=docker-container --driver-opt default-load=true
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
+
+  build:
+    commands:
+      - echo Building the Docker image...
+      - docker build --platform linux/amd64 --cache-to mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=$ECR_URI:build-cache --cache-from type=registry,ref=$ECR_URI:build-cache -t $IMAGE_REPO --builder=container -f ./deployment/ecs/Dockerfile .
+      - docker tag $IMAGE_REPO:latest $ECR_URI:latest
+      - docker tag $IMAGE_REPO:latest $ECR_URI:$IMAGE_TAG
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker image ls -a
+      - docker push $ECR_URI:latest
+      - docker push $ECR_URI:$IMAGE_TAG
+
+      - cp appspec.yml $APP_SPEC_FILE_NAME
+      - sed -i "s@__CONTAINER_NAME__@$CONTAINER_NAME@" $APP_SPEC_FILE_NAME
+      - sed -i "s@__CONTAINER_PORT__@$CONTAINER_PORT@" $APP_SPEC_FILE_NAME
+      - sed -i "s@__SUBNET_ARNS__@$SUBNET_ARNS@" $APP_SPEC_FILE_NAME
+      - sed -i "s@__SECURITY_GROUP_ID__@$SECURITY_GROUP_ID@" $APP_SPEC_FILE_NAME
+      - sed -i "s@__ASSIGN_PUBLIC_IP__@$ASSIGN_PUBLIC_IP@" $APP_SPEC_FILE_NAME
+
+      - cp taskdef-template.json $TASK_DEFINITION_FILE_NAME
+      - sed -i "s@__CONTAINER_NAME__@$CONTAINER_NAME@" $TASK_DEFINITION_FILE_NAME
+      - sed -i "s@\"__CONTAINER_PORT__\"@$CONTAINER_PORT@" $TASK_DEFINITION_FILE_NAME
+      - sed -i "s@__AWS_REGION__@$AWS_REGION@" $TASK_DEFINITION_FILE_NAME
+      - sed -i "s@__TASK_ROLE__@$TASK_EXECUTION_ROLE@" $TASK_DEFINITION_FILE_NAME
+      - sed -i "s@__EXECUTION_ROLE__@$TASK_EXECUTION_ROLE@" $TASK_DEFINITION_FILE_NAME
+      - sed -i "s@__TASK_EXECUTION_CPU__@$TASK_EXECUTION_CPU@" $TASK_DEFINITION_FILE_NAME
+      - sed -i "s@__TASK_EXECUTION_MEMORY__@$TASK_EXECUTION_MEMORY@" $TASK_DEFINITION_FILE_NAME
+      - sed -i "s@__RUNTIME_SECRETS_MANAGER_ARN__@$RUNTIME_SECRETS_MANAGER_ARN@" $TASK_DEFINITION_FILE_NAME
+      - sed -i "s@__TASK_DEFINITION_FAMILY__@$TASK_DEFINITION_FAMILY@" $TASK_DEFINITION_FILE_NAME
+      - sed -i "s@__LOG_GROUP__@$LOG_GROUP@" $TASK_DEFINITION_FILE_NAME
+      - sed -i "s@__ECR_IMAGE__@$ECR_URI:$IMAGE_TAG@" $TASK_DEFINITION_FILE_NAME
+
+      - cat $APP_SPEC_FILE_NAME
+      - cat $TASK_DEFINITION_FILE_NAME
+
+artifacts:
+  files:
+    - $APP_SPEC_FILE_NAME
+    - $TASK_DEFINITION_FILE_NAME
