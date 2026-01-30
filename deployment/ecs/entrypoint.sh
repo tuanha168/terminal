@@ -15,6 +15,7 @@ echo "USERNAME is set to: $USERNAME"
 # Build app với environment variables từ Secrets Manager
 cd /var/www
 export NODE_OPTIONS="--max-old-space-size=1024"
+export VUE_APP_USERNAME="$USERNAME"
 yarn build
 
 # Khởi động nginx

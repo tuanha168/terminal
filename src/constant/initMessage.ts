@@ -15,7 +15,7 @@ const output =
   [
     '',
     '',
-    'Welcome ' + (process.env.USERNAME ?? 'guest') + '!',
+    'Welcome ' + (process.env.VUE_APP_USERNAME ?? 'guest') + '!',
     'Type <span class="red">help</span> to view list available commands'
   ].join('<br/>')
 
