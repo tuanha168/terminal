@@ -33,6 +33,7 @@ phases:
       - TASK_EXECUTION_MEMORY=$(echo $BUILD_SECRETS | jq -r '.TASK_EXECUTION_MEMORY')
       - APP_SPEC_FILE_NAME=$(echo $BUILD_SECRETS | jq -r '.APP_SPEC_FILE_NAME')
       - CONTAINER_PORT=$(echo $BUILD_SECRETS | jq -r '.CONTAINER_PORT')
+      - ECS_SERVICE_NAME=$(echo $BUILD_SECRETS | jq -r '.ECS_SERVICE_NAME')
       - docker buildx create --name container --driver=docker-container --driver-opt default-load=true
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
 
