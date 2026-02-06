@@ -19,6 +19,8 @@ COPY --from=builder /var/www .
 COPY deployment/ecs/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+RUN yarn build
+
 EXPOSE 80 443
 
 ENTRYPOINT ["/entrypoint.sh"]
