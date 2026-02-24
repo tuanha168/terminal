@@ -12,8 +12,10 @@ phases:
       - echo Logging in to Amazon ECR....
       - aws --version
 
-      # login to Elastic container registry
-      - echo $DOCKER_TOKEN | docker login -u $DOCKER_USER --password-stdin
+      # login to DockerHub if credentials are provided, otherwise skip login
+      - |
+        [ -n "$DOCKER_USER" ] && [ -n "$DOCKER_TOKEN" ] && \
+        echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin || true
 
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
 
