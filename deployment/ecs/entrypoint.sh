@@ -21,4 +21,18 @@ export VUE_APP_USERNAME="$USERNAME"
 
 # Đợi build xong, reload nginx
 kill -HUP $NGINX_PID
-wait $NGINX_PID
+
+# Auto shutdown sau 5 phút (300 giây)
+echo "Container sẽ tự động shutdown sau 5 phút..."
+sleep 300 &
+SLEEP_PID=$!
+
+# Đợi hoặc sleep timeout hoặc nginx bị tắt
+wait -n $NGINX_PID $SLEEP_PID
+
+# Kill các process còn lại
+kill $NGINX_PID 2>/dev/null || true
+kill $SLEEP_PID 2>/dev/null || true
+
+echo "Container đang shutdown..."
+exit 0
