@@ -79,8 +79,8 @@ phases:
       - NEW_TASK_INFO=$(aws ecs register-task-definition --region "$AWS_REGION" --cli-input-json "$TASK_DEFINITION_JSON")
       - NEW_REVISION=$(echo "$NEW_TASK_INFO" | jq '.taskDefinition.revision')
 
-      - printf '[{"name":"'$CONTAINER_NAME'","imageUri":"'$ECR_URI:latest'"}]' > $TASK_DEFINITION_FILE_NAME
-      - aws ecs update-service --cluster $ECS_CLUSTER_ARN --service $ECS_SERVICE_NAME --task-definition $TASK_DEFINITION_FAMILY:$NEW_REVISION --no-force-new-deployment
+      # - printf '[{"name":"'$CONTAINER_NAME'","imageUri":"'$ECR_URI:latest'"}]' > $TASK_DEFINITION_FILE_NAME
+      # - aws ecs update-service --cluster $ECS_CLUSTER_ARN --service $ECS_SERVICE_NAME --task-definition $TASK_DEFINITION_FAMILY:$NEW_REVISION --no-force-new-deployment
 
 artifacts:
   files:
