@@ -17,8 +17,9 @@ export VUE_APP_USERNAME="$USERNAME"
 
 # Khởi động nginx
 echo "Starting nginx..."
-nginx -g 'daemon off;' &
-NGINX_PID=$!
+nginx -g 'daemon off;'
+# nginx -g 'daemon off;' &
+# NGINX_PID=$!
 
 # # Auto shutdown sau 5 phút (300 giây)
 # echo "Container sẽ tự động shutdown sau 5 phút..."
