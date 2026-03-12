@@ -1,0 +1,28 @@
+version: 0.2
+
+env:
+  secrets-manager:
+    EMPLOYEE_SECRETS: ${BUILDTIME_SECRETS_MANAGER_ARN}:main
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo Logging in to Amazon ECR....
+      - aws --version
+
+  pre_build:
+    commands:
+      - echo 'Start pre_build phase'
+      - yarn -v
+      - node --version
+
+  build:
+    commands:
+      - S3_BUCKET=$(echo $EMPLOYEE_SECRETS | jq -r '.S3_BUCKET')
+      - CLOUDFRONT_DISTRIBUTION_ID=$(echo $EMPLOYEE_SECRETS | jq -r '.CLOUDFRONT_DISTRIBUTION_ID')
+      - yarn
+      - yarn build
+      - aws s3 sync ./dist s3://${S3_BUCKET}
+      - aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DISTRIBUTION_ID} --paths '/*'
