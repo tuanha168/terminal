@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   secrets-manager:
-    EMPLOYEE_SECRETS: ${BUILDTIME_SECRETS_MANAGER_ARN}:main
+    ECS_SECRET: ${BUILDTIME_SECRETS_MANAGER_ARN}:ecs
 
 phases:
   install:
@@ -24,7 +24,7 @@ phases:
       - echo 'Start pre_build phase'
       - yarn -v
       - node --version
-      - export BUILD_SECRETS=$EMPLOYEE_SECRETS
+      - export BUILD_SECRETS=$ECS_SECRET
       - TASK_DEFINITION_FAMILY=$(echo $BUILD_SECRETS | jq -r '.TASK_DEFINITION_FAMILY')
       - ECR_URI=$(echo $BUILD_SECRETS | jq -r '.ECR_URI')
       - IMAGE_REPO=$(echo $BUILD_SECRETS | jq -r '.IMAGE_REPO')

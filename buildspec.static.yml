@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   secrets-manager:
-    EMPLOYEE_SECRETS: ${BUILDTIME_SECRETS_MANAGER_ARN}:main
+    STATIC_SECRET: ${BUILDTIME_SECRETS_MANAGER_ARN}:static
 
 phases:
   install:
@@ -20,8 +20,8 @@ phases:
 
   build:
     commands:
-      - S3_BUCKET=$(echo $EMPLOYEE_SECRETS | jq -r '.S3_BUCKET')
-      - CLOUDFRONT_DISTRIBUTION_ID=$(echo $EMPLOYEE_SECRETS | jq -r '.CLOUDFRONT_DISTRIBUTION_ID')
+      - S3_BUCKET=$(echo $STATIC_SECRET | jq -r '.S3_BUCKET')
+      - CLOUDFRONT_DISTRIBUTION_ID=$(echo $STATIC_SECRET | jq -r '.CLOUDFRONT_DISTRIBUTION_ID')
       - yarn
       - yarn build
       - aws s3 sync ./dist s3://${S3_BUCKET}
